@@ -4,8 +4,12 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
+#include <limits.h>
+#include <stdint.h>
 
 #define MAX_DIGITS 1024
+#define SLIM_MAX INT32_MAX;
+#define WIDE_MAX INT64_MAX;
 #define BASE 10
 
 // define local aliases for int32 and int64
@@ -51,16 +55,25 @@ natural *natural_from_wide(wide x) {
 	return n;
 }
 
-wide natural_to_wide(natural *n) {
-	slim *p = n->digits;
-	slim *end = n->digits + n->c;
+void natural_count(natural *n) {
+	slim *p = n->digits + MAX_DIGITS;
+	n->c = MAX_DIGITS;
+	do {
+		n->c--;	p--;
+	} while (*p == 0);
 
+	n->c++;
+}
+
+// attempt to convert a slice of slims into
+// a single wide
+wide slims_to_wide(slim *p, slim *end) {
 	wide shift = 1;
 	wide sum = 0;
 
 	while (p < end) {
 		sum += (*p) * shift;
-		assert(sum > 0);
+		//assert(sum < 0); // overflow?
 		shift *= BASE;
 		p++;
 	}
@@ -68,9 +81,17 @@ wide natural_to_wide(natural *n) {
 	return sum;
 }
 
+// attempt to pack a natural into a wide
+wide natural_to_wide(natural *n) {
+	slim *p = n->digits;
+	slim *end = n->digits + n->c;
+
+	return slims_to_wide(p, end);
+}
+
 // natural_print pretty prints a natural.
 void natural_print(natural *n) {
-	for(int i=0; i<n->c; i++) {
+	for(int i=n->c-1; i>=0; i--) {
 		printf("%d ", n->digits[i]);
 	}
 }
@@ -112,6 +133,8 @@ bool natural_eq(natural *n, natural *m) {
 // natural_normalize "flattens" the digits of n so
 // that each digit is < BASE.
 void natural_normalize(natural *n) {
+	natural_count(n);
+
 	slim carry = 0;
 	slim *p = n->digits;
 	slim *end = n->digits + n->c;
@@ -121,10 +144,32 @@ void natural_normalize(natural *n) {
 	while (carry > 0 || p < end) {
 		*p += carry;
 		carry = *p / BASE;
-		*p %= carry;
+		*p %= BASE;
 
 		p++; 
 		n->c++; //keep no of digits current
+	}
+}
+
+// normalize at least up to end
+void wide_normalize(wide *p, wide *end) {
+	wide carry = 0;
+
+	// hello segfault
+	while (carry > 0 || p < end) {
+		*p += carry;
+		carry = *p / BASE;
+		*p %= BASE;
+
+		p++; 
+	}
+}
+
+// assume normalize
+void wides_into_slims(slim *sp, wide *wp, wide *wend) {
+	while (wp < wend) {
+		*sp = (slim) *wp;	
+		sp++; wp++; 
 	}
 }
 
@@ -152,7 +197,7 @@ natural *natural_add(natural *n, natural *m) {
 
 	while (np < end) {
 		*rp = *np + *mp;	
-		np++; mp++; rp++; 
+		np++; mp++; rp++; r->c++; 
 	}
 
 	natural_normalize(r);
@@ -167,7 +212,7 @@ natural *natural_subtract(natural *n, natural *m) {
 
 	natural *r = natural_new();
 
-	if ( natural_lt(n, m) ) return r; // no negatives
+	assert( !natural_lt(n,m) );
 
 	slim *np= n->digits;
 	slim *mp= m->digits;
@@ -178,8 +223,8 @@ natural *natural_subtract(natural *n, natural *m) {
 	while (np < end) {
 		// grab one from higher order term if necessary
 		if (*np < *mp) {
-			*(mp+1) += 1;
-			*mp += BASE;
+			(*(mp+1))++;
+			*np += BASE;
 		}
 
 		*rp = *np - *mp;
@@ -195,8 +240,82 @@ void natural_free(natural *n) {
 	free(n);
 }
 
+// grade school
 natural *natural_multiply(natural *n, natural *m) {
-	natural *r = natural_new();
+	wide buffer[MAX_DIGITS] = {0};
 
+	for (int i = 0; i < n->c; i++) {
+		for (int j = 0; j < m->c; j++) { 
+			buffer[i+j] += n->digits[i]*m->digits[j];
+			wide_normalize(buffer + i + j, NULL);
+		}
+	}
+
+	natural *r = natural_new();
+	wides_into_slims(r->digits, buffer, buffer + MAX_DIGITS);
+	natural_normalize(r); // for the count
+
+	return r;
 }
 
+natural *natural_scalar_multiply(natural *n, wide x) {
+	wide *buffer[MAX_DIGITS] = {0};
+}
+
+typedef struct qandr {
+	natural *q;
+	natural *r;
+} qandr;
+
+qandr natural_divide(natural *n, natural *m) {
+	// again, doing some destructive stuff
+	wide buffer[MAX_DIGITS] = {0};
+	natural *r = natural_new();
+	memcpy(r, n, sizeof(natural));
+
+	// ie, not less than
+	while (!natural_lt(r, m)) {
+		wide rprefix = slims_to_wide(r->digits + r->c - 2, r->digits + r->c);
+		wide mprefix = slims_to_wide(m->digits + m->c - 2, m->digits + m->c);
+		int shift = r->c - m->c;
+
+		// grab another digit if necessary, move quotient digit respectively
+		if (rprefix < mprefix) {
+			rprefix = slims_to_wide(r->digits + r->c - 3, r->digits + r->c);
+			shift--;
+		}
+
+		// test quotient digit
+		wide qt = rprefix / mprefix;
+
+		// correct off by one
+		natural qtn = { .c = 1 };
+		assert(qt < INT32_MAX);
+		qtn.digits[0] = (slim) qt;
+
+		natural *product = natural_multiply(m, &qtn);
+		if ( natural_gt(product, r) ) {
+			qt--;
+			assert(qt < INT32_MAX);
+			qtn.digits[0] = (slim) qt;
+
+			natural_free(product);
+			product = natural_multiply(m, &qtn);
+		}
+
+		// move ahead
+		buffer[shift] = qt;
+		wide_normalize(buffer+shift, NULL);
+
+		natural_free(r);
+		r = natural_subtract(r, product);
+	}
+
+	// convert intermediate buffer to natural
+	natural *q = natural_new();
+	wides_into_slims(q->digits, buffer, buffer+MAX_DIGITS);
+	natural_normalize(q); // for count
+
+	qandr ret = { .q = q, .r = r};
+	return ret;
+}
