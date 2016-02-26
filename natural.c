@@ -190,3 +190,13 @@ natural *natural_subtract(natural *n, natural *m) {
 	return r;
 }
 
+void natural_free(natural *n) {
+	free(n->digits);
+	free(n);
+}
+
+natural *natural_multiply(natural *n, natural *m) {
+	natural *r = natural_new();
+
+}
+
