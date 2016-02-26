@@ -12,6 +12,8 @@
 #define WIDE_MAX INT64_MAX;
 #define BASE 10
 
+//TODO get a .h, split up the codez a little
+
 // define local aliases for int32 and int64
 // both for laziness, and in case I need
 // to change them
@@ -235,13 +237,9 @@ natural *natural_subtract(natural *n, natural *m) {
 	return r;
 }
 
-void natural_free(natural *n) {
-	free(n->digits);
-	free(n);
-}
-
 // grade school
-natural *natural_multiply(natural *n, natural *m) {
+// reuse old naturals for result
+natural *natural_multiply_recycle(natural *n, natural *m, natural *r) {
 	wide buffer[MAX_DIGITS] = {0};
 
 	for (int i = 0; i < n->c; i++) {
@@ -251,12 +249,17 @@ natural *natural_multiply(natural *n, natural *m) {
 		}
 	}
 
-	natural *r = natural_new();
 	wides_into_slims(r->digits, buffer, buffer + MAX_DIGITS);
-	natural_normalize(r); // for the count
+	natural_count(r); // for the count
 
 	return r;
 }
+
+natural *natural_multiply(natural *n, natural *m) {
+	natural *r = natural_new();
+	return natural_multiply_recycle(n,m,r);
+}
+
 
 natural *natural_scalar_multiply(natural *n, wide x) {
 	wide *buffer[MAX_DIGITS] = {0};
@@ -267,14 +270,16 @@ typedef struct qandr {
 	natural *r;
 } qandr;
 
-qandr natural_divide(natural *n, natural *m) {
+qandr natural_divide_rem(natural *n, natural *m) {
 	// again, doing some destructive stuff
 	wide buffer[MAX_DIGITS] = {0};
 	natural *r = natural_new();
 	memcpy(r, n, sizeof(natural));
 
-	// ie, not less than
 	while (!natural_lt(r, m)) {
+		// TODO handle special cases
+		
+		// main meaty stuff. consult own java for inspiration
 		wide rprefix = slims_to_wide(r->digits + r->c - 2, r->digits + r->c);
 		wide mprefix = slims_to_wide(m->digits + m->c - 2, m->digits + m->c);
 		int shift = r->c - m->c;
@@ -299,7 +304,7 @@ qandr natural_divide(natural *n, natural *m) {
 			assert(qt < INT32_MAX);
 			qtn.digits[0] = (slim) qt;
 
-			natural_free(product);
+			free(product);
 			product = natural_multiply(m, &qtn);
 		}
 
@@ -307,9 +312,11 @@ qandr natural_divide(natural *n, natural *m) {
 		buffer[shift] = qt;
 		wide_normalize(buffer+shift, NULL);
 
-		natural_free(r);
+		free(r);
 		r = natural_subtract(r, product);
 	}
+
+	// clean up
 
 	// convert intermediate buffer to natural
 	natural *q = natural_new();

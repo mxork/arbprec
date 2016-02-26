@@ -140,6 +140,36 @@ void test_multiply_sc() {
 	}
 }
 
+void test_divide_sc() {
+	for (int i = 0; i < 5; i++) {
+		wide x= (rand()), y= (rand()); 
+		
+		natural *n=natural_from_wide(x);
+		natural *m=natural_from_wide(y);
+
+		qandr qr = natural_divide_rem(n,m);
+
+		if ( (x/y) != natural_to_wide( qr.q )
+			|| (x%y) != natural_to_wide( qr.r )) {
+
+			char *fmt = "-------------\n"
+						"divide\n"
+						"\t  %"PRId64"\n"
+						"\t  %"PRId64"\n"
+						"\t= %"PRId64", %"PRId64"\n";
+
+			printf(fmt, x, y, x/y, x%y);
+			natural_print(n); printf("\n"); 
+			natural_print(m); printf("\n");
+			natural_print( qr.q ); printf("\n");
+			natural_print( qr.r ); printf("\n");
+			printf("FAIL\n");
+		} else {
+			printf("Division test passed.\n");
+		}
+	}
+}
+
 test_result test_subtract(wide x, wide y, natural *n, natural *m) {
 	// assume x > y
 	if (x < y) {
@@ -179,4 +209,5 @@ int main(int argc, char *argv[]) {
 	test_add_sc();
 	test_subtract_sc();
 	test_multiply_sc();
+	test_divide_sc();
 }
