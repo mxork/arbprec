@@ -2,6 +2,8 @@
 #include <inttypes.h>
 #include "natural.c"
 
+#define NTESTS 1000
+
 // checkout gmp
 
 typedef struct test_result {
@@ -62,12 +64,14 @@ test_result test_add(wide x, wide y, natural *n, natural *m) {
 }
 
 void test_add_sc() {
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < NTESTS; i++) {
 		wide x=rand(), y=rand();
 		natural *n=natural_from_wide(x);
 		natural *m=natural_from_wide(y);
+
+		natural *result=natural_add(n,m);
 		
-		if ( (x+y) != natural_to_wide( natural_add(n,m))) {
+		if ( (x+y) != natural_to_wide(result)) {
 			char *fmt = "-------------\n"
 						"add\n"
 						"\t  %"PRId64"\n"
@@ -77,16 +81,17 @@ void test_add_sc() {
 			printf(fmt, x, y, x+y);
 			natural_print(n); printf("\n"); 
 			natural_print(m); printf("\n");
-			natural_print( natural_add(n,m) ); printf("\n");
+			natural_print(result); printf("\n");
 			printf("FAIL\n");
 		} else {
 			printf("Add test passed.\n");
 		}
+		free(n); free(m); free(result);
 	}
 }
 
 void test_subtract_sc() {
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < NTESTS; i++) {
 		wide x=rand(), y=rand();
 		if (x < y) {
 			wide t = y;
@@ -96,8 +101,9 @@ void test_subtract_sc() {
 		
 		natural *n=natural_from_wide(x);
 		natural *m=natural_from_wide(y);
-		
-		if ( (x-y) != natural_to_wide( natural_subtract(n,m))) {
+		natural *result= natural_subtract(n,m);
+
+		if ( (x-y) != natural_to_wide(result)) {
 			char *fmt = "-------------\n"
 						"subtract\n"
 						"\t  %"PRId64"\n"
@@ -107,22 +113,25 @@ void test_subtract_sc() {
 			printf(fmt, x, y, x-y);
 			natural_print(n); printf("\n"); 
 			natural_print(m); printf("\n");
-			natural_print( natural_subtract(n,m) ); printf("\n");
+			natural_print(result); printf("\n");
 			printf("FAIL\n");
 		} else {
 			printf("Subtraction test passed.\n");
 		}
+		free(n); free(m); free(result);
 	}
 }
 
 void test_multiply_sc() {
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < NTESTS; i++) {
 		wide x= (rand()>>8), y= (rand()>>12); //keep 'em small
 		
 		natural *n=natural_from_wide(x);
 		natural *m=natural_from_wide(y);
 
-		if ( (x*y) != natural_to_wide( natural_multiply(n,m))) {
+		natural *result =  natural_multiply(n,m);
+
+		if ( (x*y) != natural_to_wide(result)) {
 			char *fmt = "-------------\n"
 						"multiply\n"
 						"\t  %"PRId64"\n"
@@ -132,16 +141,17 @@ void test_multiply_sc() {
 			printf(fmt, x, y, x*y);
 			natural_print(n); printf("\n"); 
 			natural_print(m); printf("\n");
-			natural_print( natural_multiply(n,m) ); printf("\n");
+			natural_print( result ); printf("\n");
 			printf("FAIL\n");
 		} else {
 			printf("Multiplication test passed.\n");
 		}
+		free(n); free(m); free(result);
 	}
 }
 
 void test_divide_sc() {
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < NTESTS; i++) {
 		wide x= (rand()), y= (rand()); 
 		
 		natural *n=natural_from_wide(x);
@@ -165,8 +175,10 @@ void test_divide_sc() {
 			natural_print( qr.r ); printf("\n");
 			printf("FAIL\n");
 		} else {
-			printf("Division test passed.\n");
+			printf("Division test passed. %d\n", i);
 		}
+
+		free(n); free(m); free(qr.q); free(qr.r);
 	}
 }
 
@@ -205,7 +217,6 @@ bool test_compare(wide x, wide y, natural *n, natural *m) {
 int main(int argc, char *argv[]) {
 	srand((unsigned int)time(NULL));
 
-	int ntest = 20;
 	test_add_sc();
 	test_subtract_sc();
 	test_multiply_sc();
