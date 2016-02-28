@@ -1,3 +1,6 @@
+test_float:
+	gcc -std=gnu99 test_float.c natural/*.c -lm -o test
+
 test_natural:
 	gcc -std=gnu99 test_natural.c natural/*.c -o test
 

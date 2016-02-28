@@ -59,6 +59,15 @@ floatn floatn_from_natural(natural *n) {
 	return f;
 }
 
+// as above, but takes over ownership of n: ie, assumes
+// not use elsewhere
+floatn floatn_devour_natural(natural *n) {
+	floatn f = {POS, 0, n};
+	floatn_pop_zeroes_ip(&f);
+	return f;
+}
+
+
 floatn floatn_new() {
 	natural *n = natural_new();
 	return floatn_from_natural(n);
@@ -67,7 +76,7 @@ floatn floatn_new() {
 wide floatn_to_wide(floatn f) {
 	wide x = natural_to_wide(f.man);
 	x *= (int64_t) pow(BASE, f.exp);
-	int sign = f.sgn ? -1 : 0;
+	int sign = f.sgn ? -1 : 1;
 	return sign*x;
 }
 

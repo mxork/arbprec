@@ -1,13 +1,13 @@
 #include "float/floatn.c"
 #include <time.h>
 
-#define NTESTS 20
+#define NTESTS 100000
 
 void test_add() {
 	natural nb = {}, mb ={}, rb={};
 	natural *n = &nb, *m = &mb, *rn=&rb;
 
-	for (int i=0; i<5; i++) {
+	for (int i=0; i<NTESTS; i++) {
 		wide x = rand();
 		wide y = rand();
 
@@ -18,12 +18,12 @@ void test_add() {
 		floatn g = floatn_from_natural(m);
 		g.sgn = NEG;
 
-		printf("Floats\n");
-		floatn_println(f);
-		floatn_println(g);
+		/*printf("Floats\n");*/
+		/*floatn_println(f);*/
+		/*floatn_println(g);*/
 
 		floatn r = floatn_from_natural(rn);
-		floatn_println(r);
+		/*floatn_println(r);*/
 
 		floatn_add_into(f,g,&r);
 
@@ -36,23 +36,24 @@ void test_add() {
 			floatn_println(f);
 			floatn_println(g);
 			floatn_println(r);
-
-
 			printf("Result: \n");
 			floatn_println(r);
+			printf("result: %ld\n", floatn_to_wide(r));
 			printf("expect: %ld\n", x-y);
 			printf("FAIL\n");
 		} else {
 			printf("Add test passed %d\n", i);
 		}
+		free(f.man);
+		free(g.man);
+		free(r.man);
 	}
 }
 
 void main(int argc, char *argv[]) {
-
+	srand(time(NULL));
 	/*natural *n = natural_from_wide( (wide) rand() );*/
 	/*natural *m = natural_from_wide( (wide) rand() );*/
-	srand(time(NULL));
 	test_add();
 
 }
