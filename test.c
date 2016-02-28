@@ -1,6 +1,6 @@
 #include <time.h>
 #include <inttypes.h>
-#include "natural.c"
+#include "natural.h"
 
 #define NTESTS 1000
 
@@ -84,7 +84,7 @@ void test_add_sc() {
 			natural_print(result); printf("\n");
 			printf("FAIL\n");
 		} else {
-			printf("Add test passed.\n");
+			/*printf("Add test passed.\n");*/
 		}
 		free(n); free(m); free(result);
 	}
@@ -116,7 +116,7 @@ void test_subtract_sc() {
 			natural_print(result); printf("\n");
 			printf("FAIL\n");
 		} else {
-			printf("Subtraction test passed.\n");
+			/*printf("Subtraction test passed.\n");*/
 		}
 		free(n); free(m); free(result);
 	}
@@ -144,7 +144,7 @@ void test_multiply_sc() {
 			natural_print( result ); printf("\n");
 			printf("FAIL\n");
 		} else {
-			printf("Multiplication test passed.\n");
+			/*printf("Multiplication test passed.\n");*/
 		}
 		free(n); free(m); free(result);
 	}
@@ -175,7 +175,7 @@ void test_divide_sc() {
 			natural_print( qr.r ); printf("\n");
 			printf("FAIL\n");
 		} else {
-			printf("Division test passed. %d\n", i);
+			/*printf("Division test passed. %d\n", i);*/
 		}
 
 		free(n); free(m); free(qr.q); free(qr.r);
