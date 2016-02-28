@@ -49,22 +49,39 @@ void natural_subtract_into(natural *n, natural *m, natural *r) {
 	slim *mp= m->digits;
 	slim *rp= r->digits;
 
-	slim *end= n->digits + n->c;
+	slim *nend= n->digits + n->c;
+	slim *mend= m->digits + m->c;
 
 	int carry = 0;
-	while (np < end) {
+	while (mp < mend) {
 		int sub_digit = *mp + carry;
 		carry = 0;
 
 		// grab one from higher order term if necessary
 		if (*np < sub_digit) {
 			carry++;
-			*np += BASE;
 		}
 
-		*rp = *np - sub_digit;
+		*rp = *np + carry*BASE - sub_digit;
 		np++; mp++; *rp++;
 	}
+
+	// handle those digits of n hanging above zeroes
+	// we could just memcpy after the first and be happy, but whatever
+	while (np < nend) {
+		int sub_digit = carry; //ie, *mp == 0 beyond m->c
+		carry = 0;
+
+		if (*np < sub_digit) {
+			carry++;
+		}
+		
+		*rp = *np + carry*BASE - sub_digit;
+		np++; rp++;
+	}
+
+	// necessary for count
+	memset(rp, 0, (size_t) ((r->digits + MAX_DIGITS) - rp));
 
 	natural_count(r);
 }

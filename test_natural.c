@@ -1,8 +1,8 @@
 #include <time.h>
 #include <inttypes.h>
-#include "natural.h"
+#include "natural/natural.h"
 
-#define NTESTS 1000
+#define NTESTS 10
 
 // checkout gmp
 
@@ -91,6 +91,10 @@ void test_add_sc() {
 }
 
 void test_subtract_sc() {
+	natural *n = natural_new();
+	natural *m = natural_new();
+	natural *result = natural_new();
+
 	for (int i = 0; i < NTESTS; i++) {
 		wide x=rand(), y=rand();
 		if (x < y) {
@@ -99,9 +103,9 @@ void test_subtract_sc() {
 			x = t;
 		}
 		
-		natural *n=natural_from_wide(x);
-		natural *m=natural_from_wide(y);
-		natural *result= natural_subtract(n,m);
+		natural_from_wide_into(x,n);
+		natural_from_wide_into(y,m);
+		natural_subtract_into(n,m,result);
 
 		if ( (x-y) != natural_to_wide(result)) {
 			char *fmt = "-------------\n"
@@ -116,10 +120,10 @@ void test_subtract_sc() {
 			natural_print(result); printf("\n");
 			printf("FAIL\n");
 		} else {
-			/*printf("Subtraction test passed.\n");*/
+			printf("Subtraction test passed.\n");
 		}
-		free(n); free(m); free(result);
 	}
+	free(n); free(m); free(result);
 }
 
 void test_multiply_sc() {
@@ -175,7 +179,7 @@ void test_divide_sc() {
 			natural_print( qr.r ); printf("\n");
 			printf("FAIL\n");
 		} else {
-			/*printf("Division test passed. %d\n", i);*/
+			printf("Division test passed. %d\n", i);
 		}
 
 		free(n); free(m); free(qr.q); free(qr.r);
@@ -217,8 +221,8 @@ bool test_compare(wide x, wide y, natural *n, natural *m) {
 int main(int argc, char *argv[]) {
 	srand((unsigned int)time(NULL));
 
-	test_add_sc();
+	/*test_add_sc();*/
 	test_subtract_sc();
-	test_multiply_sc();
-	test_divide_sc();
+	/*test_multiply_sc();*/
+	/*test_divide_sc();*/
 }

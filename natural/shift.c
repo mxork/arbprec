@@ -1,5 +1,5 @@
 #include "natural.h"
-//
+
 // allows negative shift, in place.
 void natural_shift_ip(natural *n, int x) {
 	if (x == 0) return;
@@ -13,7 +13,6 @@ void natural_shift_ip(natural *n, int x) {
 			// not sure how to handle non-zero bits outside range
 			src++; dst++;
 		}
-		n->c += x;
 
 	} else if (x > 0) {
 		// reverse direction for positive
@@ -26,8 +25,9 @@ void natural_shift_ip(natural *n, int x) {
 			*src = 0; 
 			src--; dst--;
 		}
-		n->c += x;
 	}
+
+	n->c += x;
 }
 
 void natural_shift_into(natural *n, int x, natural *r) {

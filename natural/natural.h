@@ -51,6 +51,7 @@ bool natural_eq(natural *n,natural *m);
 bool natural_lt(natural *n,natural *m);
 bool natural_gt(natural *n,natural *m);
 void natural_print(natural *n);
+void natural_println(natural *n);
 
 typedef struct qandr {
 	natural *q;

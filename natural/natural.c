@@ -61,6 +61,13 @@ void natural_print(natural *n) {
 	}
 }
 
+void natural_println(natural *n) {
+	for(int i=n->c-1; i>=0; i--) {
+		printf("%d ", n->digits[i]);
+	}
+	printf("\n");
+}
+
 // natural_normalize "flattens" the digits of n so
 // that each digit is < BASE. 
 void natural_normalize(natural *n) {

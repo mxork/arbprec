@@ -1,31 +1,58 @@
-#include "float.c"
+#include "float/floatn.c"
+#include <time.h>
 
-void print_binary(double d) {
-	unsigned long long bit = 1;
-	for (int i=0; i<63; i++) {
-		printf("%d", 
-				(bool) (((unsigned long long) d)>>i & bit));
+#define NTESTS 20
+
+void test_add() {
+	natural nb = {}, mb ={}, rb={};
+	natural *n = &nb, *m = &mb, *rn=&rb;
+
+	for (int i=0; i<5; i++) {
+		wide x = rand();
+		wide y = rand();
+
+		natural_from_wide_into(x, n);
+		natural_from_wide_into(y, m);
+
+		floatn f = floatn_from_natural(n);
+		floatn g = floatn_from_natural(m);
+		g.sgn = NEG;
+
+		printf("Floats\n");
+		floatn_println(f);
+		floatn_println(g);
+
+		floatn r = floatn_from_natural(rn);
+		floatn_println(r);
+
+		floatn_add_into(f,g,&r);
+
+		if (x-y != floatn_to_wide(r)) {
+			printf("-----------------\n");
+			printf("Naturals\n");
+			natural_println(n);
+			natural_println(m);
+			printf("Floats\n");
+			floatn_println(f);
+			floatn_println(g);
+			floatn_println(r);
+
+
+			printf("Result: \n");
+			floatn_println(r);
+			printf("expect: %ld\n", x-y);
+			printf("FAIL\n");
+		} else {
+			printf("Add test passed %d\n", i);
+		}
 	}
 }
 
-int main(int argc, char *argv[]) {
-	double d = 1;
-	uint32_t x;
-	double_split f;
+void main(int argc, char *argv[]) {
 
-	// this is the official way of cheating
-	memcpy(&x, &d, sizeof(d));
-	memcpy(&f, &d, sizeof(d));
+	/*natural *n = natural_from_wide( (wide) rand() );*/
+	/*natural *m = natural_from_wide( (wide) rand() );*/
+	srand(time(NULL));
+	test_add();
 
-	/*printf("neg %x\n", (x>>31) !=0);*/
-	/*printf("man %x\n", (x & ((1<<23) -1)));*/
-	/*printf("exp %x\n", (x>>23) & 0xFF );*/
-
-	printf("neg %d\n", f.neg);
-	printf("exp %d\n", f.exp);
-	printf("man %d\n", f.man);
-
-	printf("%f\n", d);
-
-	return 0;
 }
