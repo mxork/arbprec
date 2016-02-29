@@ -54,6 +54,13 @@ wide natural_to_wide(natural *n) {
 	return slims_to_wide(p, end);
 }
 
+double natural_to_double(natural *n) {
+	slim *p = n->digits;
+	slim *end = n->digits + n->c;
+
+	return slims_to_double(p, end);
+}
+
 // natural_print pretty prints a natural!
 void natural_print(natural *n) {
 	for(int i=n->c-1; i>=0; i--) {

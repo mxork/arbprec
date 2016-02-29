@@ -103,6 +103,15 @@ qandr natural_divide_rem(natural *n, natural *m) {
 	return qr;
 }
 
+// TODO again, could be cleaned up
+// r winds up holding quotient value
+void natural_divide_into(natural *n, natural *m, natural *r) {
+	qandr qr = natural_divide_rem(n, m);
+	memcpy(r, qr.q, sizeof(natural));
+	free(qr.q);
+	free(qr.r);
+}
+
 // attempt to convert a slice of slims into
 // a single wide
 wide slims_to_wide(slim *p, slim *end) {
@@ -111,6 +120,20 @@ wide slims_to_wide(slim *p, slim *end) {
 
 	while (p < end) {
 		sum += (*p) * shift;
+		assert(sum >= 0); // overflow?
+		shift *= BASE;
+		p++;
+	}
+
+	return sum;
+}
+
+double slims_to_double(slim *p, slim *end) {
+	double shift = 1;
+	double sum = 0;
+
+	while (p < end) {
+		sum += ((double)(*p))*((double) shift);
 		assert(sum >= 0); // overflow?
 		shift *= BASE;
 		p++;

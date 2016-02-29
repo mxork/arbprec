@@ -41,6 +41,8 @@ bool natural_is_valid(natural *n);
 
 void wides_into_slims(slim *sp,wide *wp,wide *wend);
 wide slims_to_wide(slim *p,slim *end);
+double slims_to_double(slim *p,slim *end);
+double natural_to_double(natural *n); 
 void wides_normalize(wide *p,wide *end);
 
 #define GRTR 1
@@ -59,6 +61,7 @@ typedef struct qandr {
 } qandr;
 
 qandr natural_divide_rem(natural *n,natural *m);
+void natural_divide_into(natural *n, natural *m, natural *r);
 void natural_divide_helper(natural *n,natural *m,natural *product,natural *q);
 qandr natural_divide_single(natural *n,slim x);
 

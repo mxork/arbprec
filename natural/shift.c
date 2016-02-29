@@ -3,6 +3,8 @@
 // allows negative shift, in place.
 void natural_shift_ip(natural *n, int x) {
 	if (x == 0) return;
+	memset(n->digits + n->c, 0, MAX_DIGITS - n->c); //simple solutions
+
 	if (x < 0) {
 		slim *dst = n->digits;
 		slim *src = n->digits - x;
