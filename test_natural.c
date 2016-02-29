@@ -2,7 +2,7 @@
 #include <inttypes.h>
 #include "natural/natural.h"
 
-#define NTESTS 10
+#define NTESTS 100
 
 // checkout gmp
 
@@ -128,14 +128,14 @@ void test_subtract_sc() {
 
 void test_multiply_sc() {
 	for (int i = 0; i < NTESTS; i++) {
-		wide x= (rand()>>8), y= (rand()>>12); //keep 'em small
+		wide x= ((wide) rand()), y= (rand()); 
 		
 		natural *n=natural_from_wide(x);
 		natural *m=natural_from_wide(y);
 
 		natural *result =  natural_multiply(n,m);
 
-		if ( (x*y) != natural_to_wide(result)) {
+		if( (x*y) != natural_to_wide(result)) {
 			char *fmt = "-------------\n"
 						"multiply\n"
 						"\t  %"PRId64"\n"
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
 	srand((unsigned int)time(NULL));
 
 	/*test_add_sc();*/
-	test_subtract_sc();
-	/*test_multiply_sc();*/
+	/*test_subtract_sc();*/
+	test_multiply_sc();
 	/*test_divide_sc();*/
 }

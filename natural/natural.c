@@ -42,7 +42,7 @@ void natural_count(natural *n) {
 		n->c--;	p--;
 	} while (*p == 0);
 
-	n->c++;
+	n->c++; //off by one!
 }
 
 // attempt to pack a natural into a wide;
@@ -64,14 +64,12 @@ double natural_to_double(natural *n) {
 // natural_print pretty prints a natural!
 void natural_print(natural *n) {
 	for(int i=n->c-1; i>=0; i--) {
-		printf("%d ", n->digits[i]);
+		printf("%d", n->digits[i]);
 	}
 }
 
 void natural_println(natural *n) {
-	for(int i=n->c-1; i>=0; i--) {
-		printf("%d ", n->digits[i]);
-	}
+	natural_print(n);
 	printf("\n");
 }
 

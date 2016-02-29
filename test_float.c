@@ -2,7 +2,7 @@
 #include <time.h>
 #include <float.h>
 
-#define NTESTS 1000
+#define NTESTS 5
 
 void test_add() {
 	natural nb = {}, mb ={}, rb={};
@@ -203,16 +203,20 @@ void test_pow() {
 		natural_from_wide_into(x, n);
 
 		floatn f = floatn_from_natural(n);
-		f.sgn = NEG;
 
 		/*printf("Floats\n");*/
-		/*floatn_println(f);*/
-		/*floatn_println(g);*/
+		floatn_println(f);
+
+		printf("f->c: %ld\n", f.man->c);
 
 		floatn r = floatn_from_natural(rn);
-		/*floatn_println(r);*/
 
 		floatn_pow_into(f,y,&r);
+
+		floatn_println(r);
+		printf("r->c: %ld\n", f.man->c);
+		printf("result: %f\n", floatn_to_double(r));
+		printf("expect: %f\n", pow(-x,y));
 
 		if ((pow(-x,y) - floatn_to_double(r))/pow(x,y) > 0.1) {
 			printf("-----------------\n");
@@ -236,9 +240,9 @@ void test_pow() {
 
 void main(int argc, char *argv[]) {
 	srand(time(NULL));
-	test_add();
-	test_multiply();
-	test_divide();
+	/*test_add();*/
+	/*test_multiply();*/
+	/*test_divide();*/
 	test_pow();
 	/*test_round();*/
 }

@@ -42,6 +42,7 @@ void wides_normalize(wide *p, wide *end) {
 // assume normalize
 void wides_into_slims(slim *sp, wide *wp, wide *wend) {
 	while (wp < wend) {
+		assert(*wp < BASE);
 		*sp = (slim) *wp;	
 		sp++; wp++; 
 	}

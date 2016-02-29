@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#define MAX_DIGITS 128
+#define MAX_DIGITS 512
 #define SLIM_MAX INT32_MAX;
 #define WIDE_MAX INT64_MAX;
 #define BASE 10

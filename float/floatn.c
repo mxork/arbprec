@@ -196,12 +196,11 @@ void floatn_multiply_ip(floatn *f, floatn g) {
 	floatn_round_ip(f, ndigits);
 }
 
-void floatn_multiply_ip_setprecision(floatn *f, floatn g, int extra) {
-	int ndigits = extra;
+void floatn_multiply_ip_setprecision(floatn *f, floatn g, int prec) {
 	natural_multiply_ip(f->man, g.man);
 	f->exp += g.exp;
 	f->sgn ^= g.sgn;
-	floatn_round_ip(f, ndigits);
+	floatn_round_ip(f, prec);
 }
 
 
@@ -222,7 +221,7 @@ void floatn_divide_into(floatn f, floatn g, floatn *r) {
 	int s = ndigits + 1; // 1==guard digits. 
 
 	int shift = s - (fm->c - gm->c); // ie if g is longer, need more shift on f
-	natural_shift_ip(fm, shift); // hereon fm->c may1317256829103130147922173237934184805822240013283849329 lie
+	natural_shift_ip(fm, shift); // hereon fm->c may lie
 	natural_divide_into(fm, gm, r->man); 
 
 	// set exp on r: ie. 178/123 -> 0.abc(d), d is guard, s = 4
@@ -236,8 +235,6 @@ void floatn_divide_into(floatn f, floatn g, floatn *r) {
 	r->sgn = f.sgn ^ g.sgn;
 };
 
-//TODO convert to O(log n)
-//hopefully, all my powers are moderately small?
 void floatn_pow_into(floatn f, int power, floatn *r) {
 	assert(power >= 0);
 	r->exp = 0;
@@ -250,10 +247,12 @@ void floatn_pow_into(floatn f, int power, floatn *r) {
 
 	// TODO, is there a decent bound for number of digits to keep?
 	while (power > 0) {
-		if (power % 2) floatn_multiply_ip_setprecision(r, tmp, MAX_DIGITS/4 -1);
-		floatn_multiply_ip_setprecision(&tmp, tmp, MAX_DIGITS/4 -1);
+		if (power % 2) floatn_multiply_ip_setprecision(r, tmp, MAX_DIGITS/4);
+		floatn_multiply_ip_setprecision(&tmp, tmp, MAX_DIGITS/4);
 		power /= 2;
+		printf("rc: %d\n", r->man->c);
+		printf("tc: %d\n", tmp.man->c);
 	}
 
-	floatn_round_ip(r, f.man->c);
+	//floatn_round_ip(r, f.man->c); // TODO no rounding? okay
 }
