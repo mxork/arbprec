@@ -207,14 +207,14 @@ void test_pow() {
 		/*printf("Floats\n");*/
 		floatn_println(f);
 
-		printf("f->c: %ld\n", f.man->c);
+		printf("f->c: %d\n", f.man->c);
 
 		floatn r = floatn_from_natural(rn);
 
 		floatn_pow_into(f,y,&r);
 
 		floatn_println(r);
-		printf("r->c: %ld\n", f.man->c);
+		printf("r->c: %d\n", f.man->c);
 		printf("result: %f\n", floatn_to_double(r));
 		printf("expect: %f\n", pow(-x,y));
 

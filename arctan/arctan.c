@@ -127,6 +127,15 @@ void floatn_half_angle_op_into(floatn f, floatn *r) {
 	floatn_divide_into_setprecision(f, denom, r, MAX_DIGITS/4);
 }
 
+void floatn_multiply_into_setprecision(floatn f, floatn g, floatn *r, int prec) {
+	int ndigits = (f.man->c < g.man->c ? f.man->c : g.man->c); 
+	natural_multiply_into(f.man, g.man, r->man);
+	r->exp = f.exp + g.exp;
+	r->sgn = f.sgn ^ g.sgn;
+	// and we round post-hoc, since we didn't do truncated mult
+	floatn_round_ip(r, prec);
+}
+
 void floatn_arctan_into(floatn f, floatn *r) {
 	double fd = floatn_to_double(f);
 	assert(fd > 0 && fd <= 10);
@@ -164,6 +173,11 @@ void floatn_arctan_into(floatn f, floatn *r) {
 	floatn term = floatn_new();	
 	floatn denomf = floatn_new();
 
+	floatn z2 = floatn_new();
+	floatn_pow_into(z, 2, &z2);
+
+	floatn zpower = floatn_from_wide(1);
+
 	//arctan(z) = SUM( -1^n * z^(2n+1) / 2n+1)
 	for(int n=0; n < 400; n++) {
 		/*printf("Sum: "); floatn_println(sum);*/
@@ -173,7 +187,10 @@ void floatn_arctan_into(floatn f, floatn *r) {
 		wide denom = 2*n + 1;
 
 		floatn_from_wide_into(denom, &denomf);
-		floatn_pow_into(z, denom, &term); //can make this much faster, if need be
+		//floatn_pow_into(z, denom, &term); //can make this much faster, if need be
+		floatn_multiply_into_setprecision(z, zpower, &term, MAX_DIGITS/4); //here, it is faster
+		floatn_multiply_ip_setprecision(&zpower, z2, MAX_DIGITS/4);
+
 		floatn_divide_into_setprecision(term, denomf, &term, 104);
 
 		term.sgn = sgn;
