@@ -188,10 +188,10 @@ void floatn_arctan_into(floatn f, floatn *r) {
 
 		floatn_from_wide_into(denom, &denomf);
 		//floatn_pow_into(z, denom, &term); //can make this much faster, if need be
-		floatn_multiply_into_setprecision(z, zpower, &term, MAX_DIGITS/4); //here, it is faster
-		floatn_multiply_ip_setprecision(&zpower, z2, MAX_DIGITS/4);
+		floatn_multiply_into_setprecision(z, zpower, &term, 105); //here, it is faster
+		floatn_multiply_ip_setprecision(&zpower, z2, 105);
 
-		floatn_divide_into_setprecision(term, denomf, &term, 104);
+		floatn_divide_into_setprecision(term, denomf, &term, 103);
 
 		term.sgn = sgn;
 

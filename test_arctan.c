@@ -85,6 +85,6 @@ void main(int argc, char *argv[]) {
 	srand(time(NULL));
 	/*test_invert();*/
 	/*test_sqrt();*/
-	/*test_arctan();*/
+	test_arctan();
 	/*test_arctan_basic();*/
 }

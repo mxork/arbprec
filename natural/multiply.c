@@ -12,7 +12,7 @@ void natural_multiply_into(natural *n, natural *m, natural *r) {
 		}
 	}
 
-	wides_into_slims(r->digits, buffer, buffer + MAX_DIGITS);
+	wides_into_slims(r->digits, buffer+MAX_DIGITS, buffer + MAX_DIGITS);
 	natural_count(r); // for the count
 }
 
