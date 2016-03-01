@@ -2,7 +2,7 @@
 #include "arctan/arctan.c"
 #include <math.h>
 
-#define NTESTS 5
+#define NTESTS 1000
 
 void test_invert() {
 	wide x = rand();
@@ -30,25 +30,25 @@ void test_sqrt() {
 		floatn f = floatn_from_wide(x);
 		//f.exp = -30;
 		floatn r = floatn_new();
-
 		floatn_sqrt_into(f, &r);
-		// so r == 1/ x^13
-		//
 
+		double rd = floatn_to_double(r);
 
-		/*if (rd != sqrt(x) ) {*/
-			/*printf("-------\n");*/
-			/*printf("FAIL\n");*/
-			/*floatn_println(f);*/
-			/*floatn_println(r);*/
-			/*printf("%f\n", (double) sqrt(x));*/
-			/*printf("%f\n", rd);*/
-			/*printf("-------\n");*/
-		/*}*/
+		// relative error
+		if ( (rd-sqrt(x))/sqrt(x) > 0.001 ) {
+			printf("-------\n");
+			printf("FAIL\n");
+			floatn_println(f);
+			floatn_println(r);
+			printf("%f\n", (double) sqrt(x));
+			printf("%f\n", rd);
+			printf("-------\n");
+		}
 	}
 }
 
 void test_arctan_basic() {
+	for (int i=0; i<NTESTS; i++) {
 	wide x = 9999999;
 	floatn f = floatn_new();
 	floatn r = floatn_new();
@@ -58,6 +58,7 @@ void test_arctan_basic() {
 	floatn_println(f);
 	floatn_arctan_into(f, &r);
 	floatn_println(r);
+	}
 }
 
 void test_arctan() {
@@ -69,12 +70,12 @@ void test_arctan() {
 		wide x = (xd * pow(10, 6));
 
 		floatn_from_wide_into(x, &f);
-		f.exp = -5;
+		f.exp = -6;
 		floatn_arctan_into(f, &r);
 
 		printf("---------\n");
 		floatn_println(r);
-		printf("%f\n", (double) atan(xd * 10 ));
+		printf("%f\n", (double) atan(xd ));//*10  ));
 		printf("---------\n");
 
 	}
@@ -84,6 +85,6 @@ void main(int argc, char *argv[]) {
 	srand(time(NULL));
 	/*test_invert();*/
 	/*test_sqrt();*/
-	test_arctan();
+	/*test_arctan();*/
 	/*test_arctan_basic();*/
 }

@@ -1,13 +1,14 @@
 #include "../float/floatn.h"
 
 // it's like pi2, but longer
+// base 10
 natural pii2man = {253, {2,7,5,4,5,9,0,0,6,5,3,6,2,8,5,1,9,3,3,9,8,6,1,1,4,2,8,7,3,2,4,6,0,3,2,7,6,6,9,2,3,8,7,8,4,5,0,4,4,1,2,2,8,9,0,9,1,5,6,4,7,7,4,4,7,4,1,1,3,2,2,8,9,7,7,2,5,5,0,6,2,9,6,9,0,5,3,1,5,0,2,4,1,5,2,7,8,5,5,0,4,2,4,6,0,4,0,7,9,7,6,2,6,8,5,1,1,1,9,2,5,7,7,4,0,3,2,2,9,6,4,5,3,2,3,3,5,1,1,4,6,6,5,2,3,4,0,4,7,0,1,9,9,3,3,5,8,5,0,1,7,6,2,1,4,7,1,0,4,1,3,9,9,4,4,0,1,3,4,1,3,0,2,8,0,9,3,5,1,6,9,2,2,7,4,7,8,4,0,1,9,2,5,5,7,8,6,9,9,6,4,8,5,8,9,0,2,4,4,1,5,7,9,3,6,1,9,6,1,2,3,1,3,2,9,1,6,6,9,8,4,9,7,6,2,3,6,9,7,0,7,5,1}}; 
 
 /*1.570796326794896619231321691639751442098584699687552910487472296153908203143104499314017412671058533991074043256641153323546922304775291115862679704064240558725142051350969260552779822311474477465190982214405487832966723064237824116893391582635600954572*/
 
 floatn pii2 = {POS, -252, &pii2man};
 
-void floatn_divide_into_setprecision(floatn f, floatn g, floatn *r, int prec) {
+void floatn_divide_into_setprecision2(floatn f, floatn g, floatn *r, int prec) {
 	natural tmpf = {};// tmpg = {};
 	natural *fm = &tmpf; natural *gm = g.man;
 	memcpy(fm, f.man, sizeof(natural)); 
@@ -25,6 +26,16 @@ void floatn_divide_into_setprecision(floatn f, floatn g, floatn *r, int prec) {
 	r->exp = f.exp - g.exp - (shift);
 	floatn_round_ip(r, ndigits);
 	r->sgn = f.sgn ^ g.sgn;
+};
+
+// hacky
+void floatn_divide_into_setprecision(floatn f, floatn g, floatn *r, int prec) {
+	floatn g_rounded = floatn_new();
+	g_rounded.exp = g.exp; g_rounded.sgn = g.sgn;
+	memcpy(g_rounded.man, g.man, sizeof(natural));
+	floatn_round_ip(&g_rounded, prec+1);
+	floatn_divide_into_setprecision2(f, g_rounded, r, prec);
+	free(g_rounded.man);
 };
 
 void floatn_invert_into(floatn f, floatn *r) {
@@ -141,7 +152,7 @@ void floatn_arctan_into(floatn f, floatn *r) {
 
 	// now, perform the maybe less obvious range 
 	// reduction, TODO if close to 1 
-	int halvings = 2;
+	int halvings = 8;
 	for (int i=0; i<halvings; i++) {
 		floatn_half_angle_op_into(z, &z);
 	}

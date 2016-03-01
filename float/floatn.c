@@ -170,7 +170,6 @@ void floatn_round_ip(floatn *f, int s) {
 	int c = f->man->c;
 	if (c <= s ) return; // already low precision; round unecessary
 
-
 	// we could do this more directly, but it works, so whatevs.
 	// TODO
 	int diff = c-s;
