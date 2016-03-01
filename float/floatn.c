@@ -17,7 +17,7 @@ void floatn_println(floatn f) {
 // could also use n->c
 int natural_zeroes_on_right(natural *n) {
 	slim *p = n->digits;
-	slim *end = n->digits + MAX_DIGITS;
+	slim *end = n->digits + n->c;
 
 	while(p < end && *p == 0) p++;
 
@@ -25,7 +25,7 @@ int natural_zeroes_on_right(natural *n) {
 }
 
 bool natural_is_zero(natural *n) {
-	return natural_zeroes_on_right(n) == MAX_DIGITS;
+	return n->c == 0;
 }
 
 // correct exp by number of zeroes, return
@@ -36,6 +36,7 @@ int floatn_pop_zeroes_ip(floatn *f) {
 		f->exp = 0;
 		return MAX_DIGITS;
 	}
+	/*printf("in pop zero call %d\n", nzeroes);*/
 	natural_shift_ip(f->man, -nzeroes);
 	f->exp += nzeroes;
 	return nzeroes;
@@ -48,6 +49,19 @@ floatn floatn_from_natural(natural *n) {
 	floatn f = {POS, 0, m};
 	floatn_pop_zeroes_ip(&f);
 	return f;
+}
+
+floatn floatn_from_wide(wide x) {
+	natural *m = natural_from_wide(x);
+	floatn f = {POS, 0, m};
+	floatn_pop_zeroes_ip(&f);
+	return f;
+}
+
+void floatn_from_wide_into(wide x, floatn *f) {
+	natural_from_wide_into(x, f->man);
+	f->sgn = POS; f->exp = 0;
+	floatn_pop_zeroes_ip(f);
 }
 
 // as above, but takes over ownership of n: ie, assumes
@@ -138,6 +152,16 @@ void floatn_add_into(floatn f, floatn g, floatn *rp) {
 	floatn_pop_zeroes_ip(rp);
 }
 
+void floatn_add_ip(floatn *f, floatn g) {
+	floatn_add_into(*f, g, f);
+}
+
+floatn floatn_add(floatn f, floatn g) {
+	floatn r = floatn_new();
+	floatn_add_into(f, g, &r);
+	return r;
+}
+
 // in the case of the mantissa of a float,
 // we can guarantee that n->c agrees with number
 // of digits
@@ -165,6 +189,7 @@ void floatn_round_ip(floatn *f, int s) {
 			*p = 0;
 			*(p+1) += 1;
 			p++;
+			if (p == f->man->digits + f->man->c) f->man->c++; // incase we increment above existing range
 		}
 	} 
 	
@@ -250,9 +275,9 @@ void floatn_pow_into(floatn f, int power, floatn *r) {
 		if (power % 2) floatn_multiply_ip_setprecision(r, tmp, MAX_DIGITS/4);
 		floatn_multiply_ip_setprecision(&tmp, tmp, MAX_DIGITS/4);
 		power /= 2;
-		printf("rc: %d\n", r->man->c);
-		printf("tc: %d\n", tmp.man->c);
+		/*printf("rc: %d\n", r->man->c);*/
+		/*printf("tc: %d\n", tmp.man->c);*/
 	}
 
-	//floatn_round_ip(r, f.man->c); // TODO no rounding? okay
+	floatn_round_ip(r, MAX_DIGITS/4); // TODO no rounding? okay
 }

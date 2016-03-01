@@ -2,6 +2,7 @@
 
 // grade school
 void natural_multiply_into(natural *n, natural *m, natural *r) {
+	assert( (n->c + m->c) < MAX_DIGITS);
 	wide buffer[MAX_DIGITS] = {0};
 
 	for (int i = 0; i < n->c; i++) {
